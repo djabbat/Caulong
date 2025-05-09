@@ -1,0 +1,34 @@
+name: caulong_flutter
+description: Caucasian Longevity — Персонализированный Гид по Продлению Жизни
+
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.1
+  http: ^1.2.1
+  intl: ^0.18.1
+  file_picker: ^10.1.5
+  shared_preferences: ^2.2.2
+  fl_chart: ^0.71.0
+  jwt_decoder: ^2.0.1
+  image_picker: ^1.1.2
+  firebase_ml_vision: ^0.12.0+3
+  flutter_local_notifications: ^19.1.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/

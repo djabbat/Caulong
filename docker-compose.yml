@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  cockroach:
+    image: cockroachdb/cockroach:v23.2.6
+    container_name: cockroachdb
+    ports:
+      - "26257:26257"
+      - "8080:8080"
+    volumes:
+      - cockroach-data:/crdb
+    command: start-single-node --insecure
+
+  fastapi:
+    build: ./backend
+    container_name: fastapi
+    ports:
+      - "8000:8000"
+    depends_on:
+      - cockroach
+    environment:
+      - DATABASE_URL=postgresql://root@cockroach:26257/caulong_db?sslmode=disable
+
+volumes:
+  cockroach-data:
