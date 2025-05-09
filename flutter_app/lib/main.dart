@@ -29,7 +29,7 @@ void main() async {
   await themeProvider.loadTheme();
 
   final dio = Dio(BaseOptions(
-    baseUrl: 'https://your-fastapi-server.com/api ',
+    baseUrl: 'https://your-fastapi-server.com/api',
     connectTimeout: const Duration(seconds: 30),
     receiveTimeout: const Duration(seconds: 30),
     headers: {'Content-Type': 'application/json'},
@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
       home: const AuthWrapper(),
       routes: {
         '/login': (context) => const LoginScreen(),
-        '/register': (context) => const RegisterScreen(),
+        '/register': (context) => const RegisterScreen(), // Удален дубликат
         '/home': (context) => const HomeScreen(),
         '/patients': (context) => const PatientListScreen(),
       },
@@ -97,7 +97,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return _isLoggedIn ? const HomeScreen() : const LoginScreen();
