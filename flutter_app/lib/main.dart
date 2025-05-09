@@ -1,59 +1,88 @@
-import 'package:caulong_flutter/screens/register_screen.dart';
-import 'package:caulong_flutter/utils/notification_service.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
-
-// Screens
-import 'screens/login_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/patients/patient_list_screen.dart'; // ✅ Новый экран пациентов
+import 'package:dio/dio.dart';
 
 // Providers
 import 'providers/theme_provider.dart';
 
 // Services
 import 'services/auth_service.dart';
+import 'services/api_service.dart';
 
-// Hive
-import 'package:hive_flutter/hive_flutter.dart';
+// Utils
+import 'utils/navigation_service.dart';
+
+// Screens
+import 'screens/login_screen.dart';
+import 'screens/register_screen.dart';
+import 'screens/home_screen.dart';
+import 'screens/patients/patient_list_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Инициализация Hive
   await Hive.initFlutter();
-  await Hive.openBox('patients_box'); // Открываем коробку для хранения данных о пациентах
+  await Hive.openBox('app_data');
 
   final themeProvider = ThemeProvider();
   await themeProvider.loadTheme();
 
-  await initNotifications(); // Инициализируем уведомления
+  final dio = Dio(BaseOptions(
+    baseUrl: 'https://your-fastapi-server.com/api ',
+    connectTimeout: const Duration(seconds: 30),
+    receiveTimeout: const Duration(seconds: 30),
+    headers: {'Content-Type': 'application/json'},
+  ));
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: themeProvider),
+        Provider(create: (_) => AuthService()),
+        Provider(create: (_) => ApiService(dio)),
       ],
-      child: AuthWrapper(),
+      child: const MyApp(),
     ),
   );
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Caulong',
+      theme: Provider.of<ThemeProvider>(context).currentThemeData,
+      navigatorKey: NavigationService.navigatorKey,
+      home: const AuthWrapper(),
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/register': (context) => const RegisterScreen(),
+        '/home': (context) => const HomeScreen(),
+        '/patients': (context) => const PatientListScreen(),
+      },
+    );
+  }
 }
 
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
 
   @override
-  AuthWrapperState createState() => AuthWrapperState();
+  State<AuthWrapper> createState() => _AuthWrapperState();
 }
 
-class AuthWrapperState extends State<AuthWrapper> {
-  final AuthService _authService = AuthService();
+class _AuthWrapperState extends State<AuthWrapper> {
+  late AuthService _authService;
   bool _isLoading = true;
   bool _isLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
+    _authService = AuthService();
     checkLoginStatus();
   }
 
@@ -68,23 +97,9 @@ class AuthWrapperState extends State<AuthWrapper> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return MaterialApp(
-        home: Scaffold(body: Center(child: CircularProgressIndicator())),
-      );
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    return Provider.value(
-      value: _authService,
-      child: MaterialApp(
-        title: 'Caucasian Longevity',
-        home: _isLoggedIn ? HomeScreen() : LoginScreen(),
-        routes: {
-          '/login': (context) => LoginScreen(),
-          '/register': (context) => RegisterScreen(),
-          '/home': (context) => HomeScreen(),
-          '/patients': (context) => PatientListScreen(), // ✅ Подключаем новый экран
-        },
-      ),
-    );
+    return _isLoggedIn ? const HomeScreen() : const LoginScreen();
   }
 }

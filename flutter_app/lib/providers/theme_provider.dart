@@ -1,28 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeProvider with ChangeNotifier {
-  bool _isDarkMode = false;
+  ThemeMode _themeMode = ThemeMode.system;
 
-  bool get isDarkMode => _isDarkMode;
+  ThemeMode get themeMode => _themeMode;
 
-  Future<void> loadTheme() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    _isDarkMode = prefs.getBool('dark_mode') ?? false;
-    notifyListeners();
+  bool get isDarkMode {
+    if (_themeMode == ThemeMode.dark) return true;
+    if (_themeMode == ThemeMode.light) return false;
+    return SchedulerBinding.instance.platformDispatcher.platformBrightness == Brightness.dark;
+  }
+
+  ThemeData get currentThemeData {
+    return _themeMode == ThemeMode.dark ? ThemeData.dark() : ThemeData.light();
   }
 
   Future<void> toggleTheme() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    _isDarkMode = !_isDarkMode;
-    await prefs.setBool('dark_mode', _isDarkMode);
+    _themeMode = _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    notifyListeners();
+    await saveTheme();
+  }
+
+  Future<void> loadTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? savedTheme = prefs.getString('theme_mode');
+    _themeMode = savedTheme == 'dark' ? ThemeMode.dark : ThemeMode.light;
     notifyListeners();
   }
 
-  // Определяем системную тему
-  void syncWithSystemTheme(BuildContext context) {
-    final brightness = MediaQuery.platformBrightnessOf(context);
-    _isDarkMode = brightness == Brightness.dark;
-    notifyListeners();
+  Future<void> saveTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('theme_mode', _themeMode == ThemeMode.dark ? 'dark' : 'light');
   }
 }

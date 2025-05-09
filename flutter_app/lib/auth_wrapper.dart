@@ -1,55 +1,41 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:caulong_flutter/providers/theme_provider.dart';
-import 'package:caulong_flutter/screens/home_screen.dart';
-import 'package:caulong_flutter/screens/login_screen.dart';
-import 'package:caulong_flutter/services/auth_service.dart';
+import 'package:flutter/scheduler.dart'; // для SchedulerBinding
+import 'package:shared_preferences/shared_preferences.dart';
 
-class AuthWrapper extends StatefulWidget {
-  const AuthWrapper({super.key});
+class ThemeProvider with ChangeNotifier {
+  ThemeMode _themeMode = ThemeMode.system;
 
-  @override
-  AuthWrapperState createState() => AuthWrapperState();
-}
+  ThemeMode get themeMode => _themeMode;
 
-class AuthWrapperState extends State<AuthWrapper> {
-  late AuthService _authService;
-  bool _isLoading = true;
-  bool _isLoggedIn = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _authService = AuthService();
-    checkLoginStatus();
+  bool get isDarkMode {
+    if (_themeMode == ThemeMode.dark) return true;
+    if (_themeMode == ThemeMode.light) return false;
+    return SchedulerBinding.instance.platformDispatcher.platformBrightness == Brightness.dark;
   }
 
-  Future<void> checkLoginStatus() async {
-    final isLoggedIn = await _authService.isLoggedIn();
-    setState(() {
-      _isLoggedIn = isLoggedIn;
-      _isLoading = false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoading) {
-      return MaterialApp(
-        home: Scaffold(body: Center(child: CircularProgressIndicator())),
-      );
+  ThemeData get currentThemeData {
+    if (_themeMode == ThemeMode.dark) {
+      return ThemeData.dark();
+    } else {
+      return ThemeData.light();
     }
+  }
 
-    final themeProvider = Provider.of<ThemeProvider>(context);
+  Future<void> toggleTheme() async {
+    _themeMode = _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    notifyListeners();
+    await saveTheme();
+  }
 
-    return MaterialApp(
-      title: 'Caucasian Longevity',
-      theme: themeProvider.isDarkMode ? ThemeData.dark() : ThemeData.light(),
-      home: _isLoggedIn ? HomeScreen() : LoginScreen(),
-      routes: {
-        '/login': (context) => LoginScreen(),
-        '/home': (context) => HomeScreen(),
-      },
-    );
+  Future<void> loadTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? savedTheme = prefs.getString('theme_mode');
+    _themeMode = savedTheme == 'dark' ? ThemeMode.dark : ThemeMode.light;
+    notifyListeners();
+  }
+
+  Future<void> saveTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('theme_mode', _themeMode == ThemeMode.dark ? 'dark' : 'light');
   }
 }
