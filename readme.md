@@ -1,15 +1,33 @@
-Подготовлю полную реализацию /login
+Настроить автоматическое создание базы данных
 
-Добавлю экран рекомендаций после анализа ИИ?
-Настрою работу с файлами (аудио/изображения)?
-Сделаю полноценную систему уведомлений?
-Добавить экран "Забыли пароль"?
-Реализовать автоматическое обновление токена?
-Сделать экран регистрации?
+Добавить health-check для FastAPI
+
+Настроить автоматическое восстановление контейнера при падении
+
+Добавить readiness/liveness эндпоинты
+
+Подключить Flutter ↔ FastAPI экран регистрации
+
+Flutter ↔ FastAPI: логин, профиль, данные пользователя
+
 Добавить поле "Запомнить меня"
-Добавить выбор языка?
-Интегрировать нотификации?
-Сделать экран профиля пользователя?
+
+Добавить экран "Забыли пароль"
+
+Добавить выбор языка
+
+Интегрировать полноценную систему уведомлений
+
+Настроить автоматическую проверку уязвимостей (Trivy, Snyk)
+
+curl -X POST http://localhost:8000/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "djabbat@gmail.com",
+    "password": "3,14dar100STOP",
+    "full_name": "Dr Jaba Tkemaladze"
+  }'
+
 
 # Caulong App
 
@@ -17,9 +35,8 @@ Caucasian Longevity
 
 ## Getting Started
 
-flutter clean
-flutter pub get
-flutter run
+docker-compose up --build -d
+http://localhost:81/
 
 ## Build
 
@@ -132,23 +149,18 @@ sudo cp cockroach-v23.2.6.linux-amd64/cockroach /usr/local/bin/c
 Убедитесь, что установлены:
 Docker
 Docker Compose
-Flutter SDK (для клиента)
+Flutter SDK
+Alembic
 
 Перейдите в папку с проектом и выполните:
 
-bash
-docker-compose up --build
+Сборка: docker-compose build
 
-Откройте новое окно терминала и создайте БД:
-bash
-cockroach sql --insecure
+Запуск миграций: docker-compose run --rm fastapi python -m alembic upgrade head
 
-Внутри SQL-оболочки:
-sql
-CREATE DATABASE caulong_db;
-\q
+Запуск всех сервисов: docker-compose up -d
 
-Теперь FastAPI автоматически создаст таблицу patients при первом запросе.
+Остановка сервисов вручную: docker-compose down
 
 ## Как локально запустить ИИ
 

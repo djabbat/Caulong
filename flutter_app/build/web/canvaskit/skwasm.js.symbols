@@ -8998,7 +8998,7 @@
 8997:record_pref_use\28hb_ot_shape_plan_t\20const*\2c\20hb_font_t*\2c\20hb_buffer_t*\29
 8998:receive_notification
 8999:read_data_from_FT_Stream
-9000:pthread_self
+8000:pthread_self
 9001:psnames_get_service
 9002:pshinter_get_t2_funcs
 9003:pshinter_get_t1_funcs

@@ -8998,7 +8998,7 @@
 8997:embind_init_Skia\28\29::$_36::__invoke\28SkCanvas&\2c\20float\2c\20float\2c\20float\2c\20float\2c\20SkPaint\20const&\29
 8998:embind_init_Skia\28\29::$_35::__invoke\28SkCanvas&\2c\20unsigned\20long\2c\20SkPaint\20const&\29
 8999:embind_init_Skia\28\29::$_34::__invoke\28SkCanvas&\2c\20unsigned\20long\2c\20SkPaint\20const&\29
-9000:embind_init_Skia\28\29::$_33::__invoke\28SkCanvas&\2c\20SkCanvas::PointMode\2c\20unsigned\20long\2c\20int\2c\20SkPaint&\29
+8000:embind_init_Skia\28\29::$_33::__invoke\28SkCanvas&\2c\20SkCanvas::PointMode\2c\20unsigned\20long\2c\20int\2c\20SkPaint&\29
 9001:embind_init_Skia\28\29::$_32::__invoke\28SkCanvas&\2c\20unsigned\20long\2c\20unsigned\20long\2c\20unsigned\20long\2c\20SkBlendMode\2c\20SkPaint\20const&\29
 9002:embind_init_Skia\28\29::$_31::__invoke\28SkCanvas&\2c\20skia::textlayout::Paragraph*\2c\20float\2c\20float\29
 9003:embind_init_Skia\28\29::$_30::__invoke\28SkCanvas&\2c\20unsigned\20long\2c\20SkPaint\20const&\29

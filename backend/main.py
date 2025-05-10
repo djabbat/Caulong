@@ -23,25 +23,23 @@ class UserCreate(BaseModel):
     gender: str | None = None
 
 # === БАЗА ДАННЫХ ===
-DATABASE_URL = "postgresql://root@cockroach:26257/caulong_db?sslmode=disable"
+DATABASE_URL = "postgresql+asyncpg://root@cockroach:26257/caulong_db?sslmode=disable"
 
-async def get_db():
-    pool = await asyncpg.create_pool(DATABASE_URL)
-    async with pool.acquire() as conn:
-        yield conn
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
 
 @app.post("/register")
 async def register(user: UserCreate):
     hashed_password = get_password_hash(user.password)
-
-    pool = await asyncpg.create_pool(DATABASE_URL)
-    async with pool.acquire() as conn:
-        try:
+    try:
+        pool = await asyncpg.create_pool(DATABASE_URL)
+        async with pool.acquire() as conn:
             result = await conn.fetchrow(
                 """
                 INSERT INTO users (email, hashed_password, full_name, birth_date, gender)
                 VALUES ($1, $2, $3, $4, $5)
-                RETURNING id, email, full_name
+                RETURNING id, email
                 """,
                 user.email,
                 hashed_password,
@@ -50,7 +48,7 @@ async def register(user: UserCreate):
                 user.gender
             )
             return {"id": result['id'], "email": result['email']}
-        except asyncpg.UniqueViolationError:
-            raise HTTPException(status_code=400, detail="Email уже существует")
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Ошибка сервера: {e}")
+    except asyncpg.UniqueViolationError:
+        raise HTTPException(status_code=400, detail="Email уже существует")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {e}")

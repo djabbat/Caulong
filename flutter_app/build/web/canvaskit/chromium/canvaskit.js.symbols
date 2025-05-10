@@ -8998,7 +8998,7 @@
 8997:SkShaper::TrivialFontRunIterator::~TrivialFontRunIterator\28\29_7569
 8998:SkShaper::TrivialFontRunIterator::~TrivialFontRunIterator\28\29
 8999:SkShaper::TrivialBiDiRunIterator::currentLevel\28\29\20const
-9000:SkShaderBlurAlgorithm::maxSigma\28\29\20const
+8000:SkShaderBlurAlgorithm::maxSigma\28\29\20const
 9001:SkShaderBlurAlgorithm::blur\28SkSize\2c\20sk_sp<SkSpecialImage>\2c\20SkIRect\20const&\2c\20SkTileMode\2c\20SkIRect\20const&\29\20const
 9002:SkScan::HairSquarePath\28SkPath\20const&\2c\20SkRasterClip\20const&\2c\20SkBlitter*\29
 9003:SkScan::HairRoundPath\28SkPath\20const&\2c\20SkRasterClip\20const&\2c\20SkBlitter*\29

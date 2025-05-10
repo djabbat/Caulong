@@ -8998,7 +8998,7 @@
 8997:portable::sub_2_floats\28portable::Params*\2c\20SkRasterPipelineStage*\2c\20float\2c\20float\2c\20float\2c\20float\29
 8998:portable::store_src_rg\28portable::Params*\2c\20SkRasterPipelineStage*\2c\20float\2c\20float\2c\20float\2c\20float\29
 8999:portable::store_src_a\28portable::Params*\2c\20SkRasterPipelineStage*\2c\20float\2c\20float\2c\20float\2c\20float\29
-9000:portable::store_src\28portable::Params*\2c\20SkRasterPipelineStage*\2c\20float\2c\20float\2c\20float\2c\20float\29
+8000:portable::store_src\28portable::Params*\2c\20SkRasterPipelineStage*\2c\20float\2c\20float\2c\20float\2c\20float\29
 9001:portable::store_rgf16\28portable::Params*\2c\20SkRasterPipelineStage*\2c\20float\2c\20float\2c\20float\2c\20float\29
 9002:portable::store_rg88\28portable::Params*\2c\20SkRasterPipelineStage*\2c\20float\2c\20float\2c\20float\2c\20float\29
 9003:portable::store_rg1616\28portable::Params*\2c\20SkRasterPipelineStage*\2c\20float\2c\20float\2c\20float\2c\20float\29
