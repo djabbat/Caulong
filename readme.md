@@ -48,7 +48,6 @@ flutter build linux --release
 - **PyTorch + FastAPI** — модель ИИ и серверная часть
 - **JWT** — безопасность авторизации
 - **GCP** — облачная инфраструктура
-
 ---
 
 ## Структура папок и файлов
@@ -114,13 +113,22 @@ sudo cp cockroach-v23.2.6.linux-amd64/cockroach /usr/local/bin/c
 
 Перейдите в папку с проектом и выполните:
 
-Сборка: docker-compose build
+Сборка: 
+- docker-compose build
 
-Запуск миграций: docker-compose run --rm fastapi python -m alembic upgrade head
+Запуск миграций: 
+- docker-compose run --rm fastapi python -m alembic upgrade head
 
-Запуск всех сервисов: docker-compose up -d
+Запуск API сервера:
+- docker-compose up fastapi
+Он будет доступен по адресу:
+👉 http://localhost:8000
 
-Остановка сервисов вручную: docker-compose down
+Запуск всех сервисов: 
+- docker-compose up -d
+
+Остановка сервисов вручную: 
+- docker-compose down
 
 ## Как локально запустить ИИ
 
@@ -283,7 +291,7 @@ flutter run
 # Сборка под платформы
 flutter build apk --release
 flutter build ios --release
-flutter build web --release
+flutter build web --release # 👉 http://localhost:81
 flutter build windows --release
 flutter build macos --release
 flutter build linux --release

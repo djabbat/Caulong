@@ -5,12 +5,8 @@ class ApiService {
 
   ApiService(this.dio);
 
-  Future<Map<String, dynamic>> analyzeHealthData(Map<String, dynamic> data) async {
-    try {
-      final response = await dio.post('/analyze', data: data);
-      return response.data;
-    } catch (e) {
-      rethrow;
-    }
+  Future<Response> post(String path, {required Map<String, dynamic> data}) async {
+    final response = await dio.post(path, data: data);
+    return response;
   }
 }

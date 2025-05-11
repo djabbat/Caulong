@@ -1,39 +1,34 @@
+import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  Future<bool> isLoggedIn() async {
-    final token = await getToken();
-    return token != null;
+  final Dio dio;
+
+  AuthService({required this.dio});
+
+  Future<void> register(String email, String password) async {
+    final data = {'email': email, 'password': password};
+    await dio.post('/register', data: data);
   }
 
   Future<void> login(String email, String password) async {
-    // Здесь можно реализовать запрос к API
-    await Future.delayed(Duration(seconds: 1));
-    await saveToken("mock_jwt_token");
+    final data = {'email': email, 'password': password};
+    final response = await dio.post('/login', data: data);
+
+    // Сохраняем токен в SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', response.data['access_token']);
   }
 
-  Future<void> register(String email, String password) async {
-    // Здесь можно реализовать запрос к API
-    await Future.delayed(Duration(seconds: 1));
-    await saveToken("mock_jwt_token");
+  Future<bool> isLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    return token != null;
   }
 
+  // ✅ Добавьте этот метод
   Future<void> logout() async {
-    await removeToken();
-  }
-
-  Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('jwt_token');
-  }
-
-  Future<void> saveToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('jwt_token', token);
-  }
-
-  Future<void> removeToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('jwt_token');
+    await prefs.remove('token'); // Удаляем токен
   }
 }

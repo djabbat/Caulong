@@ -1,24 +1,21 @@
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dio/dio.dart';
 
-class AuthProvider with ChangeNotifier {
-  bool _isLoggedIn = false;
+class AuthService {
+  final Dio dio;
 
-  bool get isLoggedIn => _isLoggedIn;
+  AuthService({required this.dio});
 
-  Future<void> checkLoginStatus() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    _isLoggedIn = prefs.containsKey('jwt_token');
-    notifyListeners();
+  Future<void> register(String email, String password) async {
+    final data = {'email': email, 'password': password};
+    await dio.post('/register', data: data);
   }
 
-  Future<void> login() async {
-    _isLoggedIn = true;
-    notifyListeners();
+  Future<void> login(String email, String password) async {
+    final data = {'email': email, 'password': password};
+    await dio.post('/login', data: data);
   }
 
-  Future<void> logout() async {
-    _isLoggedIn = false;
-    notifyListeners();
+  Future<bool> isLoggedIn() async {
+    return false;
   }
 }
