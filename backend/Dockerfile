@@ -9,27 +9,15 @@ RUN apt-get update && \
     netcat-openbsd && \
     rm -rf /var/lib/apt/lists/*
 
-# Создаем пользователя
-RUN useradd -m appuser && \
-    mkdir -p /app && \
-    chown -R appuser:appuser /app
-
 WORKDIR /app
-USER appuser
 
-# Копируем requirements.txt первым для кэширования
-COPY --chown=appuser:appuser ./backend/requirements.txt .
+# Копируем ТОЛЬКО requirements.txt сначала
+COPY requirements.txt .
 
 # Устанавливаем зависимости
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем остальной код
-COPY --chown=appuser:appuser ./backend/ /app/
+# Копируем остальные файлы
+COPY . .
 
-# Делаем скрипт исполняемым
-RUN chmod +x /app/wait-for-db.sh
-
-EXPOSE 8000
-
-# Используем скрипт как точку входа
-CMD ["/app/wait-for-db.sh"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

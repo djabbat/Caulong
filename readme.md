@@ -1,3 +1,7 @@
+Автоматическое создание БД при старте
+
+Автоматическое создание таблиц при старте
+
 Настроить автоматическое создание базы данных
 
 Добавить health-check для FastAPI
@@ -20,6 +24,8 @@ Flutter ↔ FastAPI: логин, профиль, данные пользоват
 
 Настроить автоматическую проверку уязвимостей (Trivy, Snyk)
 
+FastAPI Admin для управления пользователями
+
 curl -X POST http://localhost:8000/register \
   -H "Content-Type: application/json" \
   -d '{
@@ -28,6 +34,14 @@ curl -X POST http://localhost:8000/register \
     "full_name": "Dr Jaba Tkemaladze"
   }'
 
+git init                             # инициализация git-репозитория (если ещё не инициализирован)
+git add .                            # добавляет все файлы в индекс
+git commit -m "Первый коммит"       # создаёт коммит с сообщением
+
+git branch -M main                   # переименовывает ветку в main (опционально)
+git remote add origin https://github.com/djabbat/Caulong.git   # подключение удалённого репозитория
+git push -u origin main              # отправка на удалённый репозиторий
+
 
 # Caulong App
 
@@ -35,7 +49,11 @@ Caucasian Longevity
 
 ## Getting Started
 
-docker-compose up --build -d
+# Из корневой директории проекта (caulong/)
+
+Из корневой директории проекта:
+docker-compose build --no-cache create-db apply-migrations fastapi
+docker-compose up -d
 http://localhost:81/
 
 ## Build

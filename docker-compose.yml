@@ -1,34 +1,35 @@
 services:
+  cockroachdb:
+    image: cockroachdb/cockroach:v23.2.0
+    command: start-single-node --insecure
+    ports:
+      - "26257:26257"
+      - "8080:8080"
+    volumes:
+      - cockroach-data:/cockroach/cockroach-data
+
+  apply-migrations:
+    build: ./backend
+    command: >
+      sh -c "while ! nc -z cockroachdb 26257; do sleep 1; done &&
+      cd /app &&
+      python -m alembic upgrade head &&
+      tail -f /dev/null"
+    depends_on:
+      - cockroachdb
+    volumes:
+      - ./backend:/app
+
   fastapi:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
-    container_name: fastapi
+    build: ./backend
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
     depends_on:
-      cockroach:
-        condition: service_healthy
-    environment:
-      - DATABASE_URL=cockroachdb+asyncpg://root@cockroach:26257/caulong_db
+      - cockroachdb
+      - apply-migrations
     volumes:
       - ./backend:/app
-    restart: unless-stopped
-
-  cockroach:
-    image: cockroachdb/cockroach:v23.2.0
-    container_name: cockroach
-    ports:
-      - "26257:26257"
-      - "9080:9080"
-    volumes:
-      - cockroach_data:/var/lib/cockroach
-    command: ["start-single-node", "--insecure"]
-    healthcheck:
-      test: ["CMD", "cockroach", "node", "status", "--insecure"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
 
 volumes:
-  cockroach_data:
+  cockroach-data:
