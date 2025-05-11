@@ -1,18 +1,16 @@
+# main.py
 from fastapi import FastAPI
-from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession
+from database import engine, Base
+from models import Patient
 
 app = FastAPI()
 
-# === БАЗА ДАННЫХ ===
-DATABASE_URL = "postgresql+asyncpg://root@cockroach:26257/caulong_db?sslmode=disable"
+@app.on_event("startup")
+async def setup_database():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
-Base = declarative_base()
-
-engine = create_async_engine(DATABASE_URL)
-AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-
-@app.get("/health")
-def health_check():
-    return {"status": "healthy"}
+@app.get("/")
+async def read_root():
+    return {"message": "Welcome to Caulong API"}

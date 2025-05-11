@@ -1,11 +1,17 @@
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+import os
 
-DATABASE_URL = "postgresql+asyncpg://root@cockroach:26257/caulong_db?sslmode=disable"
+DATABASE_URL = os.getenv(
+    "DATABASE_URL", 
+    "cockroachdb+psycopg2://root@cockroachdb:26257/defaultdb?sslmode=disable"
+)
 
-engine = create_async_engine(DATABASE_URL, echo=True)
-AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-
-async def get_db():
-    async with AsyncSessionLocal() as db:
-        yield db
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    echo=True
+)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()

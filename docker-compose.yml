@@ -1,35 +1,52 @@
 services:
   cockroachdb:
     image: cockroachdb/cockroach:v23.2.0
+    container_name: cockroachdb
     command: start-single-node --insecure
     ports:
       - "26257:26257"
       - "8080:8080"
     volumes:
       - cockroach-data:/cockroach/cockroach-data
+    healthcheck:
+      test: ["CMD", "cockroach", "node", "status", "--insecure"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
 
   apply-migrations:
     build: ./backend
+    container_name: apply-migrations
+    environment:
+      - DATABASE_URL=cockroachdb+psycopg2://root@cockroachdb:26257/defaultdb?sslmode=disable
     command: >
       sh -c "while ! nc -z cockroachdb 26257; do sleep 1; done &&
-      cd /app &&
-      python -m alembic upgrade head &&
+      cd /app && python -m alembic upgrade head &&
       tail -f /dev/null"
     depends_on:
-      - cockroachdb
+      cockroachdb:
+        condition: service_healthy
     volumes:
       - ./backend:/app
+    restart: on-failure
 
   fastapi:
     build: ./backend
+    container_name: fastapi
+    environment:
+      - DATABASE_URL=cockroachdb+psycopg2://root@cockroachdb:26257/defaultdb?sslmode=disable
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
     depends_on:
-      - cockroachdb
-      - apply-migrations
+      cockroachdb:
+        condition: service_healthy
+      apply-migrations:
+        condition: service_started
     volumes:
       - ./backend:/app
+    restart: unless-stopped
 
 volumes:
   cockroach-data:

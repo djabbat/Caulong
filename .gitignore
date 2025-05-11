@@ -1,45 +1,105 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
-
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# ======================================
+# Flutter
+# ======================================
 .dart_tool/
 .flutter-plugins
-.flutter-plugins-dependencies
-.pub-cache/
-.pub/
-/build/
+.packages
+build/
+.idea/
+android/.gradle/
+android/app/debug
+android/app/profile
+android/app/release
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+macos/Pods/
+macos/.symlinks/
+macos/Flutter/Flutter.framework
+macos/Flutter/Flutter.podspec
+*.iml
+*.lock
+*.log
+pubspec.lock
 
-# Symbolication related
-app.*.symbols
+# Xcode
+DerivedData/
+*.xcworkspace
+*.xcuserstate
+*.xcodeproj/
+*.xcassets/
+*.pbxproj
 
-# Obfuscation related
-app.*.map.json
+# VS Code
+.vscode/
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# ======================================
+# Python / FastAPI
+# ======================================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.log
+.env
+.env.*
+*.egg-info/
+dist/
+build/
+.mypy_cache/
+.pytest_cache/
+coverage.*
+htmlcov/
+instance/
+.cache/
+
+# Poetry / pipenv / venv
+poetry.lock
+Pipfile.lock
+.venv/
+venv/
+
+# FastAPI generated files
+*.pid
+*.uvicorn.log
+
+# ======================================
+# Docker
+# ======================================
+*.pid
+*.seed
+docker-compose.override.yml
+.env.docker
+.dockerignore
+
+# ======================================
+# CockroachDB
+# ======================================
+cockroach-data/
+cockroach-data-local/
+*.rpt
+*.bak
+*.sql.dump
+
+# ======================================
+# General
+# ======================================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.tmp
+*.bak
+*.orig
+*.old
+*.~*
+*.todo
+
+# JetBrains (optional)
+.idea/
+*.iws
+*.ipr
+*.iml

@@ -1,60 +1,13 @@
-Автоматическое создание БД при старте
+# Caucasian Longevity
 
-Автоматическое создание таблиц при старте
-
-Настроить автоматическое создание базы данных
-
-Добавить health-check для FastAPI
-
-Настроить автоматическое восстановление контейнера при падении
-
-Добавить readiness/liveness эндпоинты
-
-Подключить Flutter ↔ FastAPI экран регистрации
-
-Flutter ↔ FastAPI: логин, профиль, данные пользователя
-
-Добавить поле "Запомнить меня"
-
-Добавить экран "Забыли пароль"
-
-Добавить выбор языка
-
-Интегрировать полноценную систему уведомлений
-
-Настроить автоматическую проверку уязвимостей (Trivy, Snyk)
-
-FastAPI Admin для управления пользователями
-
-curl -X POST http://localhost:8000/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "djabbat@gmail.com",
-    "password": "3,14dar100STOP",
-    "full_name": "Dr Jaba Tkemaladze"
-  }'
-
-git init                             # инициализация git-репозитория (если ещё не инициализирован)
-git add .                            # добавляет все файлы в индекс
-git commit -m "Первый коммит"       # создаёт коммит с сообщением
-
-git branch -M main                   # переименовывает ветку в main (опционально)
-git remote add origin https://github.com/djabbat/Caulong.git   # подключение удалённого репозитория
-git push -u origin main              # отправка на удалённый репозиторий
-
-
-# Caulong App
-
-Caucasian Longevity
+Caulong App
 
 ## Getting Started
 
-# Из корневой директории проекта (caulong/)
-
-Из корневой директории проекта:
-docker-compose build --no-cache create-db apply-migrations fastapi
-docker-compose up -d
-http://localhost:81/
+# Из корневой директории проекта
+---
+- docker-compose up -d
+---
 
 ## Build
 
@@ -101,18 +54,7 @@ flutter build linux --release
 ## Структура папок и файлов
 
 ```
-caulong/
-├── lib/
-│   ├── bloc/              # Бизнес-логика (BLoC)
-│   ├── models/            # Модели данных
-│   ├── services/          # Сервисы (API, локальное хранилище)
-│   ├── screens/           # Экраны приложения
-│   ├── widgets/           # Пользовательские виджеты
-│   └── main.dart          # Точка входа
-├── assets/                # Изображения, звуки
-├── pubspec.yaml           # Зависимости и метаданные
-└── README.md              # Документация
-```
+
 
 ---
 
@@ -165,10 +107,10 @@ sudo cp cockroach-v23.2.6.linux-amd64/cockroach /usr/local/bin/c
 ### Запуск локального узла
 
 Убедитесь, что установлены:
-Docker
-Docker Compose
-Flutter SDK
-Alembic
+- Docker
+- Docker Compose
+- Flutter SDK
+- Alembic
 
 Перейдите в папку с проектом и выполните:
 
@@ -193,7 +135,7 @@ Alembic
 
 ### Общее описание
 
-Для работы с миллиардами пользователей используется **Google Cloud Spanner** — горизонтально масштабируемая распределённая база данных от Google. Она сочетает мощь SQL с возможностью глобального масштабирования и высокой доступности.
+Для работы с миллиардами пользователей используется **CockroachDB** — горизонтально масштабируемая распределённая база данных. Она сочетает мощь SQL с возможностью глобального масштабирования и высокой доступности.
 
 ### Особенности:
 - Поддержка ACID-транзакций
@@ -235,14 +177,6 @@ def get_cached_health(user_id):
 def set_cached_health(user_id, data):
     r.setex(f"health:{user_id}", 86400, data)  # хранить 24 часа
 ```
-
-### Облачные сервисы
-
-- **GCP (Google Cloud Platform)** — основная платформа
-- **AWS / Azure** — как резервные или для аналитики
-
----
-
 ## Искусственный интеллект (ИИ)
 
 ### Что делает ИИ?
@@ -303,13 +237,6 @@ async def analyze_health(data: UserInput, token: str = Depends(validate_jwt)):
     result = ai_model.predict(data)
     return {"recommendations": result}
 ```
-
-### Шаг 3: Хостинг на Google Cloud
-
-- Используйте **Google Kubernetes Engine (GKE)** или **Cloud Run**
-- Настройте балансировку нагрузки и HTTPS
-- Автомасштабирование по количеству запросов
-
 ### Шаг 4: Безопасность
 
 - **JWT-токены**: проверка прав пользователя
