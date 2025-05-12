@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:caulong_flutter/services/auth_service.dart';
+import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,24 +13,24 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
   bool _isLoading = false;
 
 void _login() async {
-  if (_formKey.currentState?.validate() ?? false) {
+  if (_formKey.currentState!.validate()) {
     setState(() => _isLoading = true);
+    final authService = Provider.of<AuthService>(context, listen: false);
 
     try {
-      await Provider.of<AuthService>(context, listen: false)
-          .login(_emailController.text, _passwordController.text);
-
-      if (!mounted) return;
-      Navigator.pushReplacementNamed(context, '/home');
+      await authService.login(_emailController.text, _passwordController.text);
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка входа')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -42,34 +42,30 @@ void _login() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Вход")),
+      appBar: AppBar(title: const Text("Вход")),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TextFormField(
                 controller: _emailController,
-                decoration: InputDecoration(labelText: "Email"),
-                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(labelText: "Email"),
+                validator: (value) => value!.isEmpty ? "Введите email" : null,
               ),
               TextFormField(
                 controller: _passwordController,
+                decoration: const InputDecoration(labelText: "Пароль"),
                 obscureText: true,
-                decoration: InputDecoration(labelText: "Пароль"),
+                validator: (value) => value!.isEmpty ? "Введите пароль" : null,
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _isLoading ? null : _login,
-                child: _isLoading
-                    ? CircularProgressIndicator()
-                    : Text("Войти"),
+                child: _isLoading ? const CircularProgressIndicator() : const Text("Войти"),
               ),
-              TextButton(
-                onPressed: () => Navigator.pushNamed(context, '/register'),
-                child: Text("Зарегистрироваться"),
-              )
             ],
           ),
         ),

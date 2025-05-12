@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart'; // ✅ Убедитесь, что файл существует
+import 'package:caulong_flutter/services/auth_service.dart'; // замените на имя вашего проекта
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key}); // ✅ Лучший стиль
+  const RegisterScreen({super.key});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -13,23 +13,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _isLoading = false;
 
-  Future<void> _submitForm() async {
+  void _register() async {
     if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
+      final authService = Provider.of<AuthService>(context, listen: false);
+
       try {
-        final authService = Provider.of<AuthService>(context, listen: false);
         await authService.register(_emailController.text, _passwordController.text);
 
-        if (!mounted) return; // ✅ Защита от использования устаревшего контекста
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Регистрация успешна")),
-        );
-        Navigator.pop(context);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Регистрация успешна")));
+        Navigator.pop(context); // назад к логину
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Ошибка: $e")),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      } finally {
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -39,36 +40,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       appBar: AppBar(title: Text("Регистрация")),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(labelText: "Email"),
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty) return "Введите email";
-                  if (!value.contains('@')) return "Некорректный email";
-                  return null;
-                },
+                validator: (value) => value!.isEmpty ? "Введите email" : null,
               ),
               TextFormField(
                 controller: _passwordController,
                 decoration: InputDecoration(labelText: "Пароль"),
                 obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) return "Введите пароль";
-                  if (value.length < 6) return "Пароль должен быть не менее 6 символов";
-                  return null;
-                },
+                validator: (value) => value!.isEmpty ? "Введите пароль" : null,
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _submitForm,
-                child: Text("Зарегистрироваться"),
-              )
+                onPressed: _isLoading ? null : _register,
+                child: _isLoading ? CircularProgressIndicator() : Text("Зарегистрироваться"),
+              ),
             ],
           ),
         ),

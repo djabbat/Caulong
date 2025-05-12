@@ -1,31 +1,36 @@
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AIService {
-  final String baseUrl = 'https://your-fastapi-server.com/api ';
+  final Dio dio;
 
-  Future<Map<String, dynamic>> analyzeBiomarkers(double age, double cholesterol, double glucose) async {
-    final token = await _getToken();
+  AIService({required this.dio});
 
-    final response = await http.post(
-      Uri.parse('$baseUrl/ai/analyze'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token'
-      },
-      body: jsonEncode({'age': age, 'cholesterol': cholesterol, 'glucose': glucose}),
-    );
+  Future<Map<String, dynamic>> analyzeData(Map<String, dynamic> data) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
 
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Ошибка анализа');
+      final response = await dio.post(
+        '/ai/analyze',
+        data: data,
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+        ),
+      );
+
+      return response.data;
+    } on DioException catch (e) {
+      _handleError(e);
+      throw Exception('Ошибка анализа данных');
     }
   }
 
-  Future<String?> _getToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('jwt_token');
+  void _handleError(DioException e) {
+    if (e.response != null) {
+      throw Exception('Ошибка: ${e.response?.data['detail']}');
+    } else {
+      throw Exception('Нет соединения с сервером');
+    }
   }
 }

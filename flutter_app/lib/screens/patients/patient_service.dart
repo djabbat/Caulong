@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '/models/patient.dart';
+import '../../models/users.dart';
 
 class PatientService {
   static const baseUrl = 'http://localhost:8000/patients/';

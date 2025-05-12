@@ -1,51 +1,68 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-// Импорты из текущего проекта — замени 'caulong_flutter' на имя своего приложения
-import 'package:caulong_flutter/services/auth_service.dart';
-import 'package:caulong_flutter/screens/login_screen.dart';
-import 'package:caulong_flutter/screens/home_screen.dart';
+class AuthService {
+  final Dio dio;
 
-class AuthWrapper extends StatefulWidget {
-  const AuthWrapper({super.key});
+  AuthService({required this.dio});
 
-  @override
-  State<AuthWrapper> createState() => _AuthWrapperState();
+Future<void> tryAutoLogin() async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+  if (token != null) {
+    // Добавьте логику при наличии токена
+  }
 }
 
-class _AuthWrapperState extends State<AuthWrapper> {
-  bool _isLoading = true;
-  bool _isLoggedIn = false;
+  Future<void> login(String email, String password) async {
+    final response = await dio.post('/login', data: {'email': email, 'password': password});
+    final token = response.data['access_token'];
+    final refreshToken = response.data['refresh_token'];
 
-  @override
-  void initState() {
-    super.initState();
-    checkLoginStatus();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', token);
+    await prefs.setString('refresh_token', refreshToken);
   }
 
-  Future<void> checkLoginStatus() async {
-    // Получаем AuthService из Provider
-    final authService = Provider.of<AuthService>(context, listen: false);
-    final isLoggedIn = await authService.isLoggedIn();
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    await prefs.remove('refresh_token');
+  }
 
-    if (mounted) {
-      setState(() {
-        _isLoggedIn = isLoggedIn;
-        _isLoading = false;
-      });
+  Future<bool> isLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey('token');
+  }
+
+  Future<void> register(String email, String password) async {
+    try {
+      await dio.post('/register', data: {'email': email, 'password': password});
+    } on DioException catch (e) {
+      _handleError(e);
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
+  Future<void> refreshToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final refreshToken = prefs.getString('refresh_token');
 
-    return _isLoggedIn ? const HomeScreen() : const LoginScreen();
+    final response = await dio.post('/refresh-token', data: {'refresh_token': refreshToken});
+    final newAccessToken = response.data['access_token'];
+
+    await prefs.setString('token', newAccessToken);
+  }
+
+  void _handleError(DioException e) {
+    if (e.response != null) {
+      throw Exception('Ошибка: ${e.response?.data['detail']}');
+    } else {
+      throw Exception('Нет соединения с сервером');
+    }
+  }
+
+  Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
   }
 }
