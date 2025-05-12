@@ -7,9 +7,12 @@ services:
       - "26257:26257"
       - "8080:8080"
     volumes:
+      - cockroach-data:/cockroach/cockroach-data
       - ./backend/scripts:/docker-entrypoint-initdb.d
+    environment:
+      - COCKROACH_DATABASE=caulong_db
     healthcheck:
-      test: ["CMD", "cockroach", "node", "status", "--insecure", "--host=localhost"]
+      test: ["CMD", "cockroach", "sql", "--insecure", "--host=localhost", "--execute=SHOW DATABASES;"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -31,3 +34,4 @@ services:
 volumes:
   cockroach-data:
     driver: local
+
