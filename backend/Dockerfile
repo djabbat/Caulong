@@ -1,6 +1,5 @@
 FROM python:3.11-slim
 
-# Установка системных зависимостей
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     gcc \
@@ -10,13 +9,13 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-# Копируем requirements.txt (теперь он в том же контексте)
 COPY requirements.txt .
-
-# Устанавливаем зависимости
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем остальной код
 COPY . .
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Исправляем права
+RUN chown -R 1000:1000 /app && \
+    chmod -R 755 /app
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

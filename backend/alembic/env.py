@@ -1,18 +1,13 @@
-import asyncio
-from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
-from models import Base
 import os
 
+# Добавьте эту настройку для CockroachDB
+os.environ['COCKROACHDB_VERSION'] = 'v23.2.0'
+
 config = context.config
-
-# Только если конфиг логгирования существует
-if config.config_file_name and os.path.exists(config.config_file_name):
-    fileConfig(config.config_file_name)
-
-target_metadata = Base.metadata
+target_metadata = None
 
 def run_migrations_offline():
     url = config.get_main_option("sqlalchemy.url")
@@ -34,7 +29,8 @@ def run_migrations_online():
     with connectable.connect() as connection:
         context.configure(
             connection=connection,
-            target_metadata=target_metadata
+            target_metadata=target_metadata,
+            compare_type=True
         )
         with context.begin_transaction():
             context.run_migrations()

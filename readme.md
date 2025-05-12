@@ -6,7 +6,7 @@ Caulong App
 
 # Из корневой директории проекта
 ---
-- docker-compose up -d
+- docker-compose up -d --build
 ---
 
 ## Build

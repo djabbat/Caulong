@@ -1,12 +1,13 @@
 services:
   cockroachdb:
     image: cockroachdb/cockroach:v23.2.0
+    container_name: cockroachdb
     command: start-single-node --insecure --advertise-addr=0.0.0.0
     ports:
       - "26257:26257"
       - "8080:8080"
     volumes:
-      - cockroach-data:/cockroach/cockroach-data
+      - ./backend/scripts:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "cockroach", "node", "status", "--insecure", "--host=localhost"]
       interval: 5s
@@ -15,15 +16,18 @@ services:
 
   fastapi:
     build:
-      context: ./backend  # <-- Изменили контекст на папку backend
+      context: ./backend
       dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=cockroachdb+psycopg2://root@cockroachdb:26257/caulong_db?sslmode=disable
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app
+      - ./backend:/app:rw
     depends_on:
       cockroachdb:
         condition: service_healthy
 
 volumes:
   cockroach-data:
+    driver: local
