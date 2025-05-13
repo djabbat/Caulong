@@ -9,10 +9,10 @@ void main() {
   testWidgets('Smoke test', (WidgetTester tester) async {
     final dio = Dio();
     final authService = AuthService(dio: dio);
-    
+
     await tester.pumpWidget(
       ChangeNotifierProvider(
-        create: (context) => AuthProvider(authService),
+        create: (context) => AuthProvider(authService: authService), // ✅ исправлено: именованный параметр
         child: const MaterialApp(
           home: Scaffold(
             body: Center(child: Text('Привет, MyApp!')),

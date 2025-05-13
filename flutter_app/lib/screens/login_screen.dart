@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/auth_service.dart';
+import 'package:dio/dio.dart';
+import '../providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,38 +14,42 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
   bool _isLoading = false;
 
-void _login() async {
-  if (_formKey.currentState!.validate()) {
+  void _submitForm(BuildContext context) async {
+    if (!_formKey.currentState!.validate()) return;
+
     setState(() => _isLoading = true);
-    final authService = Provider.of<AuthService>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     try {
-      await authService.login(_emailController.text, _passwordController.text);
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
-      }
+      await authProvider.login(_emailController.text, _passwordController.text);
+    } on DioException catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ошибка входа: ${e.response?.data['detail'] ?? e.message}'),
+        ),
+      );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
-      }
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ошибка: $e')),
+      );
     } finally {
-      if (mounted) {
+      if (context.mounted) {
         setState(() => _isLoading = false);
       }
     }
   }
-}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Вход")),
+      appBar: AppBar(title: const Text("Войти")),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
@@ -53,19 +58,34 @@ void _login() async {
               TextFormField(
                 controller: _emailController,
                 decoration: const InputDecoration(labelText: "Email"),
-                validator: (value) => value!.isEmpty ? "Введите email" : null,
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return "Введите email";
+                  return null;
+                },
               ),
               TextFormField(
                 controller: _passwordController,
                 decoration: const InputDecoration(labelText: "Пароль"),
                 obscureText: true,
-                validator: (value) => value!.isEmpty ? "Введите пароль" : null,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return "Введите пароль";
+                  return null;
+                },
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _login,
-                child: _isLoading ? const CircularProgressIndicator() : const Text("Войти"),
-              ),
+              _isLoading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                      onPressed: () => _submitForm(context),
+                      child: const Text("Войти"),
+                    ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/register');
+                },
+                child: const Text("Зарегистрироваться"),
+              )
             ],
           ),
         ),

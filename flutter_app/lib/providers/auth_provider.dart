@@ -1,28 +1,26 @@
+// flutter_app/lib/providers/auth_provider.dart
+
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 
 class AuthProvider with ChangeNotifier {
-  final AuthService _authService;
-  String? _errorMessage;
-  bool _isLoading = false;
+  final AuthService authService;
   bool _isLoggedIn = false;
+  bool _isLoading = true;
 
-  AuthProvider(this._authService);
+  AuthProvider({required this.authService}) {
+    checkLoginStatus();
+  }
 
-  bool get isLoading => _isLoading;
   bool get isLoggedIn => _isLoggedIn;
-  String? get errorMessage => _errorMessage;
+  bool get isLoading => _isLoading;
 
-  Future<void> autoLogin() async {
+  Future<void> checkLoginStatus() async {
     _isLoading = true;
     notifyListeners();
-    
     try {
-      await _authService.tryAutoLogin();
-      _isLoggedIn = await _authService.isLoggedIn();
-      _errorMessage = null;
+      _isLoggedIn = await authService.isLoggedIn();
     } catch (e) {
-      _errorMessage = e.toString();
       _isLoggedIn = false;
     } finally {
       _isLoading = false;
@@ -31,70 +29,20 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> login(String email, String password) async {
-    _isLoading = true;
+    await authService.login(email, password);
+    _isLoggedIn = true;
     notifyListeners();
-    
-    try {
-      await _authService.login(email, password);
-      _isLoggedIn = true;
-      _errorMessage = null;
-    } catch (e) {
-      _errorMessage = e.toString();
-      _isLoggedIn = false;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> logout() async {
-    _isLoading = true;
-    notifyListeners();
-    
-    try {
-      await _authService.logout();
-      _isLoggedIn = false;
-      _errorMessage = null;
-    } catch (e) {
-      _errorMessage = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
   }
 
   Future<void> register(String email, String password) async {
-    _isLoading = true;
+    await authService.register(email, password);
+    _isLoggedIn = true; // Если сервер сразу возвращает токен после регистрации
     notifyListeners();
-    
-    try {
-      await _authService.register(email, password);
-      _errorMessage = null;
-    } catch (e) {
-      _errorMessage = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
   }
 
-  Future<void> refreshToken() async {
-    _isLoading = true;
-    notifyListeners();
-    
-    try {
-      await _authService.refreshToken();
-      _errorMessage = null;
-    } catch (e) {
-      _errorMessage = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  void clearError() {
-    _errorMessage = null;
+  Future<void> logout() async {
+    await authService.logout();
+    _isLoggedIn = false;
     notifyListeners();
   }
 }
