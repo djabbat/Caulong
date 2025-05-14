@@ -28,21 +28,59 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> login(String email, String password) async {
-    await authService.login(email, password);
-    _isLoggedIn = true;
+  Future<void> login({
+    required String username,
+    required String password,
+  }) async {
+    _isLoading = true;
     notifyListeners();
+    try {
+      await authService.login(
+        username: username,
+        password: password,
+      );
+      _isLoggedIn = true;
+    } catch (e) {
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
-  Future<void> register(String email, String password) async {
-    await authService.register(email, password);
-    _isLoggedIn = true; // Если сервер сразу возвращает токен после регистрации
+  Future<void> register({
+    required String email,
+    required String password,
+    required String username,
+  }) async {
+    _isLoading = true;
     notifyListeners();
+    try {
+      await authService.register(
+        email: email,
+        password: password,
+        username: username,
+      );
+      _isLoggedIn = true;
+    } catch (e) {
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> logout() async {
-    await authService.logout();
-    _isLoggedIn = false;
+    _isLoading = true;
     notifyListeners();
+    try {
+      await authService.logout();
+      _isLoggedIn = false;
+    } catch (e) {
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }

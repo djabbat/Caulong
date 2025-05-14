@@ -2,36 +2,51 @@ services:
   cockroachdb:
     image: cockroachdb/cockroach:v23.2.0
     container_name: cockroachdb
-    command: start-single-node --insecure --advertise-addr=0.0.0.0
+    command: start-single-node --insecure --advertise-addr=cockroachdb
     ports:
       - "26257:26257"
       - "8080:8080"
     volumes:
       - cockroach-data:/cockroach/cockroach-data
-      - ./backend/scripts:/docker-entrypoint-initdb.d
-    environment:
-      - COCKROACH_DATABASE=caulong_db
+    networks:
+      - caulong_network
     healthcheck:
-      test: ["CMD", "cockroach", "sql", "--insecure", "--host=localhost", "--execute=SHOW DATABASES;"]
+      test: ["CMD", "cockroach", "sql", "--insecure", "--host=cockroachdb", "-e", "SELECT 1"]
       interval: 5s
       timeout: 5s
       retries: 10
+
+  init-db:
+    image: cockroachdb/cockroach:v23.2.0
+    container_name: caulong-init-db
+    depends_on:
+      cockroachdb:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "/app/init-db.sh"]
+    volumes:
+      - ./backend/scripts/init-db.sh:/app/init-db.sh
+    networks:
+      - caulong_network
 
   fastapi:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    container_name: caulong-fastapi
     environment:
-      - DATABASE_URL=cockroachdb+psycopg2://root@cockroachdb:26257/caulong_db?sslmode=disable
+      DATABASE_URL: cockroachdb+psycopg2://root@cockroachdb:26257/caulong_db?sslmode=disable
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend:/app:rw
     depends_on:
-      cockroachdb:
-        condition: service_healthy
+      init-db:
+        condition: service_completed_successfully
+    networks:
+      - caulong_network
+
+networks:
+  caulong_network:
+    driver: bridge
 
 volumes:
   cockroach-data:
     driver: local
-

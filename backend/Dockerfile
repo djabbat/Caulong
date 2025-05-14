@@ -1,21 +1,39 @@
-FROM python:3.11-slim
+# Используем минимальный образ Python
+FROM python:3.11.9-slim
 
+# Устанавливаем утилиты для сборки и PostgreSQL-зависимости
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    gcc \
-    python3-dev \
-    libpq-dev && \
+        gcc \
+        python3-dev \
+        libpq-dev \
+        netcat-openbsd && \
     rm -rf /var/lib/apt/lists/*
 
+# Создаём непривилегированного пользователя
+RUN adduser --disabled-password --gecos '' appuser && \
+    mkdir -p /app && \
+    chown -R appuser /app
+
+# Рабочая директория
 WORKDIR /app
 
-COPY requirements.txt .
+# Копируем requirements и устанавливаем зависимости
+COPY --chown=appuser:appuser requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# Копируем исходники приложения
+COPY --chown=appuser:appuser . .
 
-# Исправляем права
-RUN chown -R 1000:1000 /app && \
-    chmod -R 755 /app
+# Копируем скрипт ожидания БД и делаем его исполняемым
+COPY --chown=appuser:appuser scripts/wait-for-db.sh /app/wait-for-db.sh
+RUN chmod +x /app/wait-for-db.sh
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Переключаемся на непривилегированного пользователя
+USER appuser
+
+# Открываем порт
+EXPOSE 8000
+
+# Запускаем скрипт ожидания БД
+ENTRYPOINT ["/app/wait-for-db.sh"]

@@ -1,41 +1,33 @@
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from logging.config import fileConfig
+from sqlalchemy import engine_from_config, pool
 from alembic import context
+import sys
 import os
 
-# Добавьте эту настройку для CockroachDB
-os.environ['COCKROACHDB_VERSION'] = 'v23.2.0'
+# Добавляем путь к проекту
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
+# Импортируем модели
+from backend.models import Base
+from backend.database import engine  # Явный импорт engine
+
+# Конфигурация Alembic
 config = context.config
-target_metadata = None
-
-def run_migrations_offline():
-    url = config.get_main_option("sqlalchemy.url")
-    context.configure(
-        url=url,
-        target_metadata=target_metadata,
-        literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
-    )
-    with context.begin_transaction():
-        context.run_migrations()
+fileConfig(config.config_file_name)
+target_metadata = Base.metadata
 
 def run_migrations_online():
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    connectable = engine
+
     with connectable.connect() as connection:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
-            compare_type=True
+            compare_type=True,
+            render_as_batch=True  # Важно для CockroachDB
         )
+
         with context.begin_transaction():
             context.run_migrations()
 
-if context.is_offline_mode():
-    run_migrations_offline()
-else:
-    run_migrations_online()
+run_migrations_online()
